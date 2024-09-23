@@ -1,3 +1,3 @@
-module github.com/CatProgrammer1/Mlp-go
+module mlp.go
 
 go 1.23.1
