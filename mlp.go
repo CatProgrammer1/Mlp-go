@@ -1,4 +1,4 @@
-package mlpgo
+package mlpgo 
 
 import (
 	"log"
@@ -60,6 +60,9 @@ func (mlp *MLP) Feed(input []float64) []float64 {
 }
 
 func (mlp *MLP) Train(input []float64, expected []float64) {
+	if len(input) != len(mlp.layers[0].neurons) {
+		log.Fatalln("Input length must match the number of neurons in the input layer.")
+	}
 	nextInput := input
 
 	for i := 0; i < len(mlp.layers); i++ {
@@ -103,7 +106,7 @@ func (n *Neuron) Sigmoid(x float64) float64 {
 	return 1 / (1 + math.Exp(-x))
 }
 
-func (n *Neuron) SigmoidDerative(x float64) float64 {
+func (n *Neuron) SigmoidDerivative(x float64) float64 {
 	return x * (1 - x)
 }
 
@@ -123,8 +126,8 @@ func (n *Neuron) Train(input []float64, expected float64) {
 	err := expected - result
 
 	for i := 0; i < len(n.weights); i++ {
-		n.weights[i] += n.learningRate * err * n.SigmoidDerative(result) * input[i]
+		n.weights[i] += n.learningRate * err * n.SigmoidDerivative(result) * input[i]
 	}
 
-	n.bias += n.learningRate * err * n.SigmoidDerative(result)
+	n.bias += n.learningRate * err * n.SigmoidDerivative(result)
 }
