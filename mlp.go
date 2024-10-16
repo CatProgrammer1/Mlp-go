@@ -12,7 +12,7 @@ type MLP struct {
 }
 
 func RandWeight() float64 {
-	return -1 + rand.Float64()*(1-(-1))
+	return rand.Float64()*2 - 1
 }
 
 func NewMLP(learningRate float64, weightsAmount int, neuronsAndLayersAmount []uint) *MLP {
@@ -22,20 +22,17 @@ func NewMLP(learningRate float64, weightsAmount int, neuronsAndLayersAmount []ui
 	}
 
 	for i := 0; i < len(neuronsAndLayersAmount); i++ {
-
 		newLayer := Layer{}
-
 		newNeuronsWeightsAmount := weightsAmount
 
-		if len(mlp.layers)-1 >= 0 {
-			newNeuronsWeightsAmount = len(mlp.layers[len(mlp.layers)-1].neurons)
+		if i > 0 {
+			newNeuronsWeightsAmount = int(neuronsAndLayersAmount[i-1])
 		}
 
 		for j := 0; j < int(neuronsAndLayersAmount[i]); j++ {
-
 			newNeuron := Neuron{
 				learningRate: learningRate,
-				bias:         1,
+				bias:         RandWeight(),
 			}
 
 			for k := 0; k < newNeuronsWeightsAmount; k++ {
@@ -52,7 +49,7 @@ func NewMLP(learningRate float64, weightsAmount int, neuronsAndLayersAmount []ui
 }
 
 func (mlp *MLP) Feed(input []float64) []float64 {
-	var nextInput []float64 = input
+	nextInput := input
 
 	for i := 0; i < len(mlp.layers); i++ {
 		output := mlp.layers[i].Feed(nextInput)
@@ -63,7 +60,7 @@ func (mlp *MLP) Feed(input []float64) []float64 {
 }
 
 func (mlp *MLP) Train(input []float64, expected []float64) {
-	var nextInput []float64 = input
+	nextInput := input
 
 	for i := 0; i < len(mlp.layers); i++ {
 		mlp.layers[i].Train(nextInput, expected)
@@ -86,11 +83,12 @@ func (l *Layer) Feed(input []float64) []float64 {
 }
 
 func (l *Layer) Train(input []float64, expected []float64) {
+	if len(l.neurons) != len(expected) {
+		log.Fatalln(`Amount of neurons in the layer and length of "expected" array must be the same.
+		Neurons amount:`, len(l.neurons), `; Length of "expected" array:`, len(expected))
+	}
+
 	for i := 0; i < len(l.neurons); i++ {
-		if len(l.neurons) != len(expected) {
-			log.Fatalln(`Amount of neurons in the layer and length of "expected" array must be the same.
-			Neurons amount:`, len(l.neurons), `;Lenght of "expected" array:`, len(expected))
-		}
 		l.neurons[i].Train(input, expected[i])
 	}
 }
@@ -110,13 +108,11 @@ func (n *Neuron) SigmoidDerative(x float64) float64 {
 }
 
 func (n *Neuron) Feed(input []float64) float64 {
-	var sum float64
+	sum := n.bias
 
 	for i := 0; i < len(n.weights); i++ {
 		sum += input[i] * n.weights[i]
 	}
-
-	sum += n.bias
 
 	return n.Sigmoid(sum)
 }
